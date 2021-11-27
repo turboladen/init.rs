@@ -3,7 +3,7 @@ use turducken_nvim::{
     option::{
         self, flags::AddAssignFlags, ClipboardSettings, ColorColumnValue, CompleteOptSettings,
         IncCommandValue, ListCharsSettings, ShortMessItem, ShowTablineValue, SpellLangValue,
-        StringFlags, VimOption,
+        StringFlags, UncheckedString, VimOption, SignColumnValue
     },
 };
 
@@ -107,4 +107,14 @@ pub extern "C" fn init() {
     // 19. The swap file
     //-------------------------------------------------------------------------
     option::History::set_global(300).ok();
+
+    //-------------------------------------------------------------------------
+    // 22. Running make and jumping to errors
+    //-------------------------------------------------------------------------
+    option::GrepPrg::set_global(UncheckedString::new("rg --vimgrep --files")).ok();
+
+    //-------------------------------------------------------------------------
+    // 25. Various
+    //-------------------------------------------------------------------------
+    option::SignColumn::set_global(SignColumnValue::Yes).ok();
 }
