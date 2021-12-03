@@ -1,10 +1,11 @@
-use turducken_nvim::{
+use overkill_nvim::{
     key_code::KeyCode,
     option::{
-        self, flags::AddAssignFlags, ClipboardSettings, ColorColumnValue, CompleteOptSettings,
-        IncCommandValue, ListCharsSettings, ShortMessItem, ShowTablineValue, SpellLangValue,
-        StringFlags, UncheckedString, VimOption, SignColumnValue
+        self, flags::AddAssignFlags, BooleanOption, ClipboardSettings, ColorColumnValue,
+        CompleteOptSettings, ListCharsSettings, NumberOption, ShortMessItem,
+        ShowTablineValue, SignColumnValue, SpellLangValue, StringFlags, StringOption,
     },
+    NvimString,
 };
 
 #[no_mangle]
@@ -18,7 +19,8 @@ pub extern "C" fn init() {
     // 2. Moving around, searching and patterns
     //-------------------------------------------------------------------------
     option::SmartCase::set_global(true).ok();
-    option::IncCommand::set_global(IncCommandValue::NoSplit).ok();
+    // 'nosplit' is default as of neovim 0.6.0
+    // option::IncCommand::set_global(IncCommandValue::NoSplit).ok();
 
     //-------------------------------------------------------------------------
     // 4. Displaying text
@@ -27,7 +29,7 @@ pub extern "C" fn init() {
     option::CmdHeight::set_global(2).ok();
     option::LineBreak::set_global(true).ok();
     option::List::set_global(true).ok();
-    option::ListChars::set_global(
+    option::ListChars::set(
         ListCharsSettings::default()
             .tab2('▸', ' ')
             .trail('·')
@@ -36,7 +38,7 @@ pub extern "C" fn init() {
             .precedes('❮'),
     )
     .ok();
-    option::Number::set_global(true).ok();
+    option::Number::set(true).ok();
     option::ScrollOff::set_global(2).ok();
     option::ShowTabline::set_global(ShowTablineValue::Always).ok();
 
@@ -59,7 +61,8 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     option::SplitBelow::set_global(true).ok();
     option::SplitRight::set_global(true).ok();
-    option::Hidden::set_global(true).ok();
+    // Default in neovim 0.6.0 now.
+    // option::Hidden::set_global(true).ok();
 
     //-------------------------------------------------------------------------
     // 11. Messages and info
@@ -111,10 +114,10 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     // 22. Running make and jumping to errors
     //-------------------------------------------------------------------------
-    option::GrepPrg::set_global(UncheckedString::new("rg --vimgrep --files")).ok();
+    option::GrepPrg::set_global(NvimString::new_unchecked("rg --vimgrep --files")).ok();
 
     //-------------------------------------------------------------------------
     // 25. Various
     //-------------------------------------------------------------------------
-    option::SignColumn::set_global(SignColumnValue::Yes).ok();
+    option::SignColumn::set(SignColumnValue::Yes).unwrap();
 }
