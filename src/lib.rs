@@ -4,6 +4,7 @@ use overkill_nvim::{
         self, flags::AddAssignFlags, BooleanOption, ClipboardSettings, ColorColumnValue,
         CompleteOptSettings, ListCharsSettings, NumberOption, ShortMessItem,
         ShowTablineValue, SignColumnValue, SpellLangValue, StringFlags, StringOption,
+        NullableStringOption
     },
     NvimString,
 };
@@ -13,7 +14,7 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     // 1. Important
     //-------------------------------------------------------------------------
-    option::PasteToggle::set_global(KeyCode::F9).ok();
+    option::PasteToggle::set_global(Some(KeyCode::F9)).ok();
 
     //-------------------------------------------------------------------------
     // 2. Moving around, searching and patterns
@@ -30,13 +31,13 @@ pub extern "C" fn init() {
     option::LineBreak::set_global(true).ok();
     option::List::set_global(true).ok();
     option::ListChars::set(
-        ListCharsSettings::default()
+        Some(ListCharsSettings::default()
             .tab2('▸', ' ')
             .trail('·')
             .nbsp('_')
             .extends('❯')
             .precedes('❮'),
-    )
+    ))
     .ok();
     option::Number::set(true).ok();
     option::ScrollOff::set_global(2).ok();
@@ -45,10 +46,10 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     // 5. Syntax, highlighting and spelling
     //-------------------------------------------------------------------------
-    option::ColorColumn::set(StringFlags::new(vec![
+    option::ColorColumn::set(Some(StringFlags::new(vec![
         ColorColumnValue::Absolute(80),
         ColorColumnValue::Absolute(120),
-    ]))
+    ])))
     .ok();
     option::CursorLine::set(true).ok();
     option::SpellLang::set(StringFlags::new(vec![SpellLangValue::EnUs])).ok();
@@ -72,7 +73,7 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     // 12. Selecting text
     //-------------------------------------------------------------------------
-    option::Clipboard::set_global(ClipboardSettings::default().unnamed()).ok();
+    option::Clipboard::set_global(Some(ClipboardSettings::default().unnamed().unnamed_plus())).unwrap();
 
     //-------------------------------------------------------------------------
     // 13. Editing text
