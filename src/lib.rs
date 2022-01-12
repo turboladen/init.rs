@@ -1,10 +1,10 @@
 use overkill_nvim::{
+    api::api::{keymap::set_map, Mode},
     key_code::KeyCode,
     option::{
         self, flags::AddAssignFlags, BooleanOption, ClipboardSettings, ColorColumnValue,
-        CompleteOptSettings, ListCharsSettings, NumberOption, ShortMessItem,
+        CompleteOptSettings, ListCharsSettings, NullableStringOption, NumberOption, ShortMessItem,
         ShowTablineValue, SignColumnValue, SpellLangValue, StringFlags, StringOption,
-        NullableStringOption
     },
     NvimString,
 };
@@ -30,8 +30,8 @@ pub extern "C" fn init() {
     option::CmdHeight::set_global(2).ok();
     option::LineBreak::set_global(true).ok();
     option::List::set_global(true).ok();
-    option::ListChars::set(
-        Some(ListCharsSettings::default()
+    option::ListChars::set(Some(
+        ListCharsSettings::default()
             .tab2('▸', ' ')
             .trail('·')
             .nbsp('_')
@@ -73,7 +73,8 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     // 12. Selecting text
     //-------------------------------------------------------------------------
-    option::Clipboard::set_global(Some(ClipboardSettings::default().unnamed().unnamed_plus())).unwrap();
+    option::Clipboard::set_global(Some(ClipboardSettings::default().unnamed().unnamed_plus()))
+        .unwrap();
 
     //-------------------------------------------------------------------------
     // 13. Editing text
@@ -95,6 +96,40 @@ pub extern "C" fn init() {
     // 15. Folding
     //-------------------------------------------------------------------------
     option::FoldEnable::set_global(false).ok();
+
+    //-------------------------------------------------------------------------
+    // 17. mappings
+    //-------------------------------------------------------------------------
+    set_map(Mode::Normal, "<leader>ev", "<cmd>vsplit $MYVIMRC<CR>", None).unwrap();
+
+    set_map(
+        Mode::Normal,
+        "<leader>ep",
+        "<cmd>vsplit ~/.config/nvim/lua/plugins.lua<CR>",
+        None,
+    )
+    .unwrap();
+
+    set_map(Mode::Normal, "<leader>v", "<cmd>source $MYVIMRC<CR>", None).unwrap();
+
+    // Save some ring-finger key strokes
+    set_map(Mode::Normal, "<C-h>", "<C-w>h", None).unwrap();
+    set_map(Mode::Normal, "<C-j>", "<C-w>j", None).unwrap();
+    set_map(Mode::Normal, "<C-k>", "<C-w>k", None).unwrap();
+    set_map(Mode::Normal, "<C-l>", "<C-w>l", None).unwrap();
+
+    // Disable Ex mode
+    // set_map(Mode::Normal, "Q", "<NOP>", None).unwrap();
+
+    // Split a line and remove whitespace from old line.
+    // https://www.reddit.com/r/vim/comments/3g8y3r/finally_hacked_together_a_quick_split_line/ctw4b0i
+    set_map(
+        Mode::Normal,
+        "S",
+        r#"i<CR><ESC>^mwgk:silent! s/\v +$/<CR>:noh<CR>"#,
+        None,
+    )
+    .unwrap();
 
     //-------------------------------------------------------------------------
     // 18. Reading and writing files

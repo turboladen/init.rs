@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# overkill-nvim = { path = "../neovim-rust/overkill-nvim/" }
+# overkill_nvim = { path = "../overkill_nvim/overkill_nvim/" }
 overkill_nvim = { git = "https://github.com/turboladen/overkill_nvim", branch = "feature/mappings" }
 
 [profile.release]
