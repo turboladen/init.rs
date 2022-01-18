@@ -1,6 +1,6 @@
 use overkill_nvim::{
-    api::api::{keymap::set_map, Mode},
     key_code::KeyCode,
+    mapping::{MapMode, Mapper},
     option::{
         self, flags::AddAssignFlags, BooleanOption, ClipboardSettings, ColorColumnValue,
         CompleteOptSettings, ListCharsSettings, NullableStringOption, NumberOption, ShortMessItem,
@@ -100,36 +100,30 @@ pub extern "C" fn init() {
     //-------------------------------------------------------------------------
     // 17. mappings
     //-------------------------------------------------------------------------
-    set_map(Mode::Normal, "<leader>ev", "<cmd>vsplit $MYVIMRC<CR>", None).unwrap();
-
-    set_map(
-        Mode::Normal,
-        "<leader>ep",
-        "<cmd>vsplit ~/.config/nvim/lua/plugins.lua<CR>",
-        None,
-    )
-    .unwrap();
-
-    set_map(Mode::Normal, "<leader>v", "<cmd>source $MYVIMRC<CR>", None).unwrap();
-
     // Save some ring-finger key strokes
-    set_map(Mode::Normal, "<C-h>", "<C-w>h", None).unwrap();
-    set_map(Mode::Normal, "<C-j>", "<C-w>j", None).unwrap();
-    set_map(Mode::Normal, "<C-k>", "<C-w>k", None).unwrap();
-    set_map(Mode::Normal, "<C-l>", "<C-w>l", None).unwrap();
+    let mut normal_mapper = Mapper::new(MapMode::Normal);
 
-    // Disable Ex mode
-    // set_map(Mode::Normal, "Q", "<NOP>", None).unwrap();
+    normal_mapper.group(|mapper| {
+        let mapper = mapper.silent();
+        mapper.noremap("<leader>ev", "<cmd>vsplit $MYVIMRC<CR>");
+        mapper.noremap(
+            "<leader>ep",
+            "<cmd>vsplit ~/.config/nvim/lua/plugins.lua<CR>",
+        );
+        mapper.noremap("<leader>v", "<cmd>source $MYVIMRC<CR>");
 
-    // Split a line and remove whitespace from old line.
-    // https://www.reddit.com/r/vim/comments/3g8y3r/finally_hacked_together_a_quick_split_line/ctw4b0i
-    set_map(
-        Mode::Normal,
-        "S",
-        r#"i<CR><ESC>^mwgk:silent! s/\v +$/<CR>:noh<CR>"#,
-        None,
-    )
-    .unwrap();
+        // Save some ring-finger key strokes
+        mapper.noremap("<C-l>", "<C-w>l");
+        mapper.noremap("<C-h>", "<C-w>h");
+        mapper.noremap("<C-j>", "<C-w>j");
+        mapper.noremap("<C-k>", "<C-w>k");
+
+        // Split a line and remove whitespace from old line.
+        // https://www.reddit.com/r/vim/comments/3g8y3r/finally_hacked_together_a_quick_split_line/ctw4b0i
+        mapper.noremap("S", r#"i<CR><ESC>^mwgk:silent! s/\v +$/<CR>:noh<CR>"#);
+    });
+
+    normal_mapper.map("Q", "<NOP>");
 
     //-------------------------------------------------------------------------
     // 18. Reading and writing files

@@ -4,3 +4,7 @@ benchmark:
 
 fix-formatting:
   cargo +nightly fmt
+
+check-in-nvim:
+  cargo build --release
+  nvim
