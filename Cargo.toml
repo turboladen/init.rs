@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # overkill_nvim = { path = "../overkill_nvim/overkill_nvim/" }
-overkill_nvim = { git = "https://github.com/turboladen/overkill_nvim", branch = "feature/mappings" }
+overkill_nvim = { git = "https://github.com/turboladen/overkill_nvim", branch = "feature/autocommands" }
 
 [profile.release]
 lto = true

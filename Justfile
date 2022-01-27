@@ -1,3 +1,5 @@
+default: check-in-nvim
+
 benchmark:
   cargo build --release
   hyperfine --warmup 4 "nvim +q"
@@ -8,3 +10,5 @@ fix-formatting:
 check-in-nvim:
   cargo build --release
   nvim
+
+# vim:ft=just
