@@ -11,4 +11,8 @@ check-in-nvim:
   cargo build --release
   nvim
 
+build-and-copy:
+  cargo build --release
+  cp -f target/release/libinit_rs.dylib ~/.config/nvim/lua/init_rs.so
+
 # vim:ft=just
