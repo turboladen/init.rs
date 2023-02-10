@@ -12,6 +12,8 @@ crate-type = ["cdylib"]
 [dependencies]
 # overkill_nvim = { path = "../overkill_nvim/overkill_nvim/" }
 overkill_nvim = { git = "https://github.com/turboladen/overkill_nvim", branch = "feature/autocommands" }
+nvim-oxi = { version = "0.2", features = ["neovim-0-8"] }
+mlua = { version = "0.8", features = ["luajit", "module"] }
 
 [profile.release]
 lto = true
