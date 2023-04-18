@@ -11,13 +11,13 @@ pub(super) fn init() {
     }
     autocmd::augroup("end").unwrap();
 
-    autocmd::augroup("FTCheck").unwrap();
-    {
-        autocmd::force_autocmd("").unwrap();
-        autocmd::autocmd("BufNewFile,BufRead *.jbuilder set ft=ruby").unwrap();
-        autocmd::autocmd("BufNewFile,BufRead *.rs.hbs setlocal ft=rust.handlebars").unwrap();
-    }
-    autocmd::augroup("end").unwrap();
+    // autocmd::augroup("FTCheck").unwrap();
+    // {
+    //     autocmd::force_autocmd("").unwrap();
+    //     autocmd::autocmd("BufNewFile,BufRead *.jbuilder set ft=ruby").unwrap();
+    //     autocmd::autocmd("BufNewFile,BufRead *.rs.hbs setlocal ft=rust.handlebars").unwrap();
+    // }
+    // autocmd::augroup("end").unwrap();
 
     autocmd::augroup("FTOptions").unwrap();
     {
@@ -29,7 +29,10 @@ pub(super) fn init() {
         autocmd::autocmd("FileType qf setlocal nospell").unwrap();
 
         autocmd::autocmd("FileType vim setlocal ts=2 sts=2 sw=2 expandtab").unwrap();
-        autocmd::autocmd("FileType yaml setlocal ts=2 sts=2 sw=2 expandtab cursorcolumn indentkeys-=<:>").unwrap();
+        autocmd::autocmd(
+            "FileType yaml setlocal ts=2 sts=2 sw=2 expandtab cursorcolumn indentkeys-=<:>",
+        )
+        .unwrap();
         autocmd::autocmd("FileType zsh setlocal ts=2 sts=2 sw=2 expandtab").unwrap();
     }
     autocmd::augroup("end").unwrap();

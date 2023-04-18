@@ -1,9 +1,8 @@
 use overkill_nvim::{
-    key_code::KeyCode,
     option::{
-        self, flags::AddAssignFlags, BooleanOption, ClipboardSettings, ColorColumnValue,
-        CompleteOptSettings, ListCharsSettings, NullableStringOption, NumberOption, ShortMessItem,
-        ShowTablineValue, SignColumnValue, SpellLangValue, StringFlags, StringOption,
+        self, BooleanOption, ClipboardSettings, ColorColumnValue, CompleteOptSettings,
+        ListCharsSettings, NullableStringOption, NumberOption, SignColumnValue, SpellLangValue,
+        StringFlags, StringOption,
     },
     NvimString,
 };
@@ -12,14 +11,11 @@ pub(super) fn init() {
     //-------------------------------------------------------------------------
     // 1. Important
     //-------------------------------------------------------------------------
-    option::PasteToggle::set_global(Some(KeyCode::F9)).ok();
 
     //-------------------------------------------------------------------------
     // 2. Moving around, searching and patterns
     //-------------------------------------------------------------------------
     option::SmartCase::set_global(true).ok();
-    // 'nosplit' is default as of neovim 0.6.0
-    // option::IncCommand::set_global(IncCommandValue::NoSplit).ok();
 
     //-------------------------------------------------------------------------
     // 4. Displaying text
@@ -39,7 +35,7 @@ pub(super) fn init() {
     .ok();
     option::Number::set(true).ok();
     option::ScrollOff::set_global(2).ok();
-    option::ShowTabline::set_global(ShowTablineValue::Always).ok();
+    // option::ShowTabline::set_global(ShowTablineValue::Always).ok();
 
     //-------------------------------------------------------------------------
     // 5. Syntax, highlighting and spelling
@@ -60,13 +56,11 @@ pub(super) fn init() {
     //-------------------------------------------------------------------------
     option::SplitBelow::set_global(true).ok();
     option::SplitRight::set_global(true).ok();
-    // Default in neovim 0.6.0 now.
-    // option::Hidden::set_global(true).ok();
 
     //-------------------------------------------------------------------------
     // 11. Messages and info
     //-------------------------------------------------------------------------
-    option::ShortMess::add_assign(ShortMessItem::SuppressInsCompetionMenuMessages).ok();
+    // option::ShortMess::add_assign(ShortMessItem::SuppressInsCompetionMenuMessages).ok();
 
     //-------------------------------------------------------------------------
     // 12. Selecting text
@@ -103,7 +97,7 @@ pub(super) fn init() {
     //-------------------------------------------------------------------------
     // 19. The swap file
     //-------------------------------------------------------------------------
-    option::UpdateTime::set_global(500).ok();
+    option::UpdateTime::set_global(300).ok();
     option::SwapFile::set_global(false).ok();
 
     //-------------------------------------------------------------------------

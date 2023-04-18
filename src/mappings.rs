@@ -54,12 +54,9 @@ fn plugin_mappings(mut n: Mapper, mut v: Mapper) {
         let n = n.silent();
 
         //-----------------------
-        // neogit
+        // lazygit
         //-----------------------
-        n.map(
-            "<leader>gs",
-            &cmd(r#"lua require("neogit").open({kind = "split"})"#),
-        );
+        n.noremap("<leader>gg", &cmd("LazyGit<CR>"));
 
         //-----------------------
         // nvim-dap
@@ -99,12 +96,6 @@ fn plugin_mappings(mut n: Mapper, mut v: Mapper) {
             &cmd("lua require('telescope.builtin').grep_string({ search = 'TODO' })"),
         );
 
-        // telescope-github.nvim
-        n.noremap("<leader>ghi", &telescope_gh("issues"));
-        n.noremap("<leader>ghp", &telescope_gh("pull_request"));
-        n.noremap("<leader>ghg", &telescope_gh("gist"));
-        n.noremap("<leader>ghr", &telescope_gh("run"));
-
         //-----------------------
         // trouble.nvim
         //-----------------------
@@ -140,11 +131,6 @@ fn plugin_mappings(mut n: Mapper, mut v: Mapper) {
     });
 
     //-----------------------
-    // auto-session
-    //-----------------------
-    n.noremap("<leader>sr", &cmd("RestoreSession"));
-
-    //-----------------------
     // nvim-dap
     //-----------------------
     n.noremap("<F5>", &cmd("lua require('dap').continue()"));
@@ -173,15 +159,10 @@ fn plugin_mappings(mut n: Mapper, mut v: Mapper) {
     //-----------------------
     // nvim-hlslens
     //-----------------------
-    n.noremap("*", "*<cmd>lua require('hlslens').start()<CR>");
-    n.noremap("#", "#<cmd>lua require('hlslens').start()<CR>");
-    n.noremap("g*", "g*<cmd>lua require('hlslens').start()<CR>");
-    n.noremap("g#", "g#<cmd>lua require('hlslens').start()<CR>");
-
-    //-----------------------
-    // nvim-lint
-    //-----------------------
-    n.noremap("<leader>l", &cmd("lua require('lint').try_lint()"));
+    // n.noremap("*", "*<cmd>lua require('hlslens').start()<CR>");
+    // n.noremap("#", "#<cmd>lua require('hlslens').start()<CR>");
+    // n.noremap("g*", "g*<cmd>lua require('hlslens').start()<CR>");
+    // n.noremap("g#", "g#<cmd>lua require('hlslens').start()<CR>");
 
     //-----------------------
     // vim-ripgrep
@@ -191,11 +172,11 @@ fn plugin_mappings(mut n: Mapper, mut v: Mapper) {
     //-----------------------
     // vim-test
     //-----------------------
-    n.noremap("<leader>tn", &cmd("TestNearest"));
-    n.noremap("<leader>tf", &cmd("TestFile"));
-    n.noremap("<leader>ta", &cmd("TestSuite"));
-    n.noremap("<leader>tl", &cmd("TestLast"));
-    n.noremap("<leader>tv", &cmd("TestVisit"));
+    // n.noremap("<leader>tn", &cmd("TestNearest"));
+    // n.noremap("<leader>tf", &cmd("TestFile"));
+    // n.noremap("<leader>ta", &cmd("TestSuite"));
+    // n.noremap("<leader>tl", &cmd("TestLast"));
+    // n.noremap("<leader>tv", &cmd("TestVisit"));
 
     //-----------------------
     // rust-tools
@@ -209,10 +190,6 @@ fn cmd<T: Display>(cmd: T) -> String {
 
 fn telescope_builtin<T: Display>(cmd_string: T) -> String {
     cmd(format!("lua require('telescope.builtin').{cmd_string}()"))
-}
-
-fn telescope_gh<T: Display>(cmd_string: T) -> String {
-    cmd(format!("Telescope gh {cmd_string}"))
 }
 
 fn trouble_toggle<T: Display>(cmd_string: T) -> String {

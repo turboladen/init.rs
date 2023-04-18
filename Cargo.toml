@@ -10,11 +10,17 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# overkill_nvim = { path = "../overkill_nvim/overkill_nvim/" }
-overkill_nvim = { git = "https://github.com/turboladen/overkill_nvim", branch = "feature/autocommands" }
-nvim-oxi = { version = "0.2", features = ["neovim-0-8"] }
-mlua = { version = "0.8", features = ["luajit", "module"] }
+overkill_nvim = { path = "../overkill_nvim/overkill_nvim/" }
+# overkill_nvim = { git = "https://github.com/turboladen/overkill_nvim", branch = "feature/autocommands" }
+# stromboli = { git = "https://github.com/turboladen/stromboli", branch = "feature/more-things" }
+# everforest = { path = "../everforest/" }
+nvim-oxi = { version = "0.2", features = ["neovim-0-8"], optional = true }
+mlua = { version = "0.8", features = ["luajit", "module"], optional = true }
 
 [profile.release]
 lto = true
 codegen-units = 1
+
+[features]
+default = []
+oxi = ["nvim-oxi", "mlua"]
