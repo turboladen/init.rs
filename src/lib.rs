@@ -1,56 +1,39 @@
-// mod autocmds;
-mod mappings;
-mod options;
+pub(crate) mod completers;
 
-#[cfg(feature = "oxi")]
-#[nvim_oxi::module]
-fn init_rs() -> Result<Dictionary, oxi::Error> {
-    use nvim_oxi::{api as oxi, Dictionary};
-    options::init();
-    mappings::init();
-    // autocmds::init();
-    //
+use nvim_oxi as oxi;
+use nvim_sous_chef_logger::LogLevel;
+use oxi::{Dictionary, Function, Object};
 
-    Ok(Dictionary::new())
-    // Ok(Dictionary::from_iter([
-    //     (
-    //         "load_everforest_hard_dark",
-    //         Function::from_fn(everforest::load_hard_dark),
-    //     ),
-    //     (
-    //         "load_everforest_hard_light",
-    //         Function::from_fn(everforest::load_hard_light),
-    //     ),
-    //     (
-    //         "load_everforest_medium_dark",
-    //         Function::from_fn(everforest::load_medium_dark),
-    //     ),
-    //     (
-    //         "load_everforest_medium_light",
-    //         Function::from_fn(everforest::load_medium_light),
-    //     ),
-    //     (
-    //         "load_everforest_soft_dark",
-    //         Function::from_fn(everforest::load_soft_dark),
-    //     ),
-    //     (
-    //         "load_everforest_soft_light",
-    //         Function::from_fn(everforest::load_soft_light),
-    //     ),
-    // ]))
+use nvim_sous_chef_complete_fn::CompleteFn;
+
+#[oxi::module]
+fn init_rs() -> oxi::Result<Dictionary> {
+    let regex_buffer_completer = Function::from_fn(completers::RegexBufferCompleter::complete_fn);
+    let enable_logging = Function::from_fn(|(maybe_max_level,)| {
+        enable_logging(maybe_max_level);
+        Ok::<(), nvim_oxi::Error>(())
+    });
+    let disable_logging = Function::from_fn(|_: ()| {
+        disable_logging();
+        Ok::<(), nvim_oxi::Error>(())
+    });
+
+    Ok(Dictionary::from_iter([
+        (
+            "regex_buffer_completer",
+            Object::from(regex_buffer_completer),
+        ),
+        ("enable_logging", Object::from(enable_logging)),
+        ("disable_logging", Object::from(disable_logging)),
+    ]))
 }
 
-#[no_mangle]
-pub extern "C" fn init_options() {
-    options::init();
+pub fn enable_logging(max_level: Option<LogLevel>) {
+    nvim_oxi::print!("[sous_chef.init_rs] Calling enable()");
+    nvim_sous_chef_logger::enable(max_level);
 }
 
-#[no_mangle]
-pub extern "C" fn init_mappings() {
-    mappings::init();
+pub fn disable_logging() {
+    nvim_sous_chef_logger::disable();
 }
 
-// #[no_mangle]
-// pub extern "C" fn init_autocmds() {
-//     autocmds::init();
-// }
