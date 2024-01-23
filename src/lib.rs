@@ -1,13 +1,11 @@
 pub(crate) mod completers;
 
-use nvim_oxi as oxi;
-use nvim_sous_chef_logger::LogLevel;
-use oxi::{Dictionary, Function, Object};
-
+use nvim_oxi::{Dictionary, Function, Object};
 use nvim_sous_chef_complete_fn::CompleteFn;
+use nvim_sous_chef_logger::LogLevel;
 
-#[oxi::module]
-fn init_rs() -> oxi::Result<Dictionary> {
+#[nvim_oxi::module]
+fn init_rs() -> nvim_oxi::Result<Dictionary> {
     let regex_buffer_completer = Function::from_fn(completers::RegexBufferCompleter::complete_fn);
     let enable_logging = Function::from_fn(|(maybe_max_level,)| {
         enable_logging(maybe_max_level);
@@ -36,4 +34,3 @@ pub fn enable_logging(max_level: Option<LogLevel>) {
 pub fn disable_logging() {
     nvim_sous_chef_logger::disable();
 }
-

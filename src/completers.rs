@@ -1,13 +1,11 @@
-use nvim_oxi as oxi;
-use regex::bytes::Regex;
-
+use nvim_oxi::{self, api::Buffer};
 use nvim_sous_chef_complete_fn::{matches::Matches, CompleteFn};
-use oxi::api::Buffer;
+use regex::bytes::Regex;
 
 pub struct RegexBufferCompleter;
 
 impl CompleteFn for RegexBufferCompleter {
-    fn make_matches(base: oxi::String) -> oxi::Result<Matches> {
+    fn make_matches(base: nvim_oxi::String) -> nvim_oxi::Result<Matches> {
         let mut matches = Matches::default();
 
         let base_str = match std::str::from_utf8(base.as_bytes()) {
