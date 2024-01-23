@@ -1,19 +1,21 @@
 use nvim_oxi::{self, api::Buffer};
-use nvim_sous_chef_complete_fn::{matches::Matches, CompleteFn};
+use nvim_sous_chef::complete_fn::{
+    completion::matches::{List, Matches},
+    CompleteFn,
+};
 use regex::bytes::Regex;
 
-pub struct RegexBufferCompleter;
+/// Struct for implementing `CompleteFn` on.
+///
+pub(crate) struct RegexBufferCompleter;
 
 impl CompleteFn for RegexBufferCompleter {
     fn make_matches(base: nvim_oxi::String) -> nvim_oxi::Result<Matches> {
-        let mut matches = Matches::default();
+        let mut matches = List::default();
 
-        let base_str = match std::str::from_utf8(base.as_bytes()) {
-            Ok(s) => s,
-            Err(_) => {
-                log::error!("Unable to read base as UTF-8 bytes: {base}");
-                return Ok(matches);
-            }
+        let Ok(base_str) = std::str::from_utf8(base.as_bytes()) else {
+            log::error!("Unable to read base as UTF-8 bytes: {base}");
+            return Ok(Matches::List(matches));
         };
         log::debug!("Completing using base_str: {base_str}");
 
@@ -23,7 +25,7 @@ impl CompleteFn for RegexBufferCompleter {
 
             for line in current_buffer.get_lines(..=current_buffer.line_count()?, false)? {
                 file_bytes.extend_from_slice(line.as_bytes());
-                file_bytes.extend_from_slice(b"\n")
+                file_bytes.extend_from_slice(b"\n");
             }
 
             file_bytes
@@ -42,6 +44,6 @@ impl CompleteFn for RegexBufferCompleter {
 
         matches.sort_words();
 
-        Ok(matches)
+        Ok(Matches::List(matches))
     }
 }

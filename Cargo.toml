@@ -11,8 +11,7 @@ crate-type = ["cdylib"]
 log = "0.4"
 nvim-oxi = { version = "0.4", features = ["neovim-0-9"] }
 # nvim-sous_chef-complete_fn = { git = "ssh://git@github.com/turboladen/nvim-sous_chef" }
-nvim-sous_chef-complete_fn = { path = "../nvim-sous_chef/crates/complete_fn" }
-nvim-sous_chef-logger = { path = "../nvim-sous_chef/crates/logger" }
+nvim-sous_chef = { path = "../nvim-sous_chef/crates/sous_chef" }
 regex = "1.10"
 
 [profile.release]
