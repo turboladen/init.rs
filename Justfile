@@ -11,7 +11,8 @@ check-in-nvim:
   cargo build --release
   nvim
 
-# Note that the copy must be run while no instances of nvim are running.
+# Note that the copy must be run while no instances of nvim are running (well,
+# no instances that have this .so file loaded).
 build-and-copy:
   cargo build --release
   cp -f target/release/libinit_rs.dylib ~/.config/nvim/lua/init_rs.so
