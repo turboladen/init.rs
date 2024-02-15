@@ -1,5 +1,5 @@
 use nvim_oxi::{self, api::Buffer};
-use nvim_sous_chef::complete_fn::{
+use nvim_sous_chef::ins_completion::complete_fn::{
     completion::matches::{List, Matches},
     CompleteFn,
 };

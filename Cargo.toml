@@ -8,8 +8,11 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
+grep = "0.3.1"
+ignore = "0.4.22"
 log = "0.4"
-nvim-oxi = { version = "0.4", features = ["neovim-0-9"] }
+# nvim-oxi = { version = "0.4", features = ["neovim-0-9"] }
+nvim-oxi = { path = "../../not_my_projects/nvim-oxi" }
 # nvim-sous_chef-complete_fn = { git = "ssh://git@github.com/turboladen/nvim-sous_chef" }
 nvim-sous_chef = { path = "../nvim-sous_chef/crates/sous_chef" }
 regex = "1.10"

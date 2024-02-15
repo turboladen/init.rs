@@ -19,10 +19,12 @@
     unused_qualifications
 )]
 #![allow(clippy::redundant_pub_crate)]
+
 pub(crate) mod completers;
+pub(crate) mod ripgrep;
 
 use nvim_oxi::{Dictionary, Function, Object};
-use nvim_sous_chef::{complete_fn::CompleteFn, logger::LogLevel};
+use nvim_sous_chef::{ins_completion::complete_fn::CompleteFn, logger::LogLevel};
 
 #[allow(clippy::unnecessary_wraps)]
 #[nvim_oxi::module]
@@ -33,6 +35,7 @@ fn init_rs() -> nvim_oxi::Result<Dictionary> {
         enable_logging(maybe_max_level);
         Ok::<(), nvim_oxi::Error>(())
     });
+
     let disable_logging = Function::from_fn(|()| {
         disable_logging();
         Ok::<(), nvim_oxi::Error>(())
@@ -45,6 +48,7 @@ fn init_rs() -> nvim_oxi::Result<Dictionary> {
         ),
         ("enable_logging", Object::from(enable_logging)),
         ("disable_logging", Object::from(disable_logging)),
+        ("rg", crate::ripgrep::lua_rg()),
     ]))
 }
 
