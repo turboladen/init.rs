@@ -9,6 +9,8 @@ use ignore::WalkBuilder;
 use nvim_oxi::{Array, Dictionary, Function, Object};
 use nvim_sous_chef::builtin::quickfix::SetQuickFixListItem;
 
+/// Dictionary that contains all of the `ripgrep` related Lua functions.
+///
 pub(crate) fn ripgrep() -> Dictionary {
     let rg = Function::from_fn(|(matcher,)| rg(matcher));
     let rg_to_quick_fix = Function::from_fn(|(matcher,)| rg_to_quick_fix(matcher));
@@ -19,6 +21,24 @@ pub(crate) fn ripgrep() -> Dictionary {
     ])
 }
 
+/// Searches for Regex matches, given by `requested_regex_str`, and returns a (Lua) `Array` of
+/// `Dictionary`s, which are in the form of:
+///
+/// ```lua
+/// {
+///   file_name = "the/file/path",
+///   line_number = 42,
+///   column_start = 1,
+///   column_end = 5,
+///   text_line = "the line of text that matched the regex",
+///   pattern = "the given regex"
+/// }
+/// ```
+///
+/// If `requested_regex_str` is not given, it uses `<cword>` (the word that's under the cursor).
+///
+/// NOTE: This does not do anything with the search results--you must handle that.
+///
 fn rg(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Array> {
     let search_results = _rg(requested_regex_str)?;
     let array: Array = search_results.into_iter().map(Object::from).collect();
@@ -26,6 +46,29 @@ fn rg(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Array> 
     Ok(array)
 }
 
+/// Searches for Regex matches, given by `requested_regex_str`, and returns a (Lua) `Array` of
+/// `Dictionary`s, which are in the form of items for passing to `setqflist()`:
+///
+/// ```lua
+/// {
+///   filename = "the/file/path",
+///   lnum = 42,
+///   col = 1,
+///   text = "the line of text that matched the regex",
+///   pattern = "the given regex"
+/// }
+/// ```
+///
+/// If `requested_regex_str` is not given, it uses `<cword>` (the word that's under the cursor).
+///
+/// NOTE: This does not _set_ the quickfix list--that's up to you. For example:
+///
+/// ```lua
+/// local results = require("init_rs").ripgrep.rg_to_quick_fix(matcher)
+/// vim.api.nvim_call_function("setqflist", { results })
+/// vim.api.nvim_command("copen")
+/// ```
+///
 fn rg_to_quick_fix(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Array> {
     let search_results = _rg(requested_regex_str)?;
 
@@ -133,7 +176,7 @@ impl From<Match> for Dictionary {
 
 impl From<Match> for SetQuickFixListItem {
     fn from(value: Match) -> Self {
-        SetQuickFixListItem {
+        Self {
             filename: Some(value.file_name),
             lnum: Some(value.line_number),
             col: Some(value.column_start),
