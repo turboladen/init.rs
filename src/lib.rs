@@ -48,7 +48,7 @@ fn init_rs() -> nvim_oxi::Result<Dictionary> {
         ),
         ("enable_logging", Object::from(enable_logging)),
         ("disable_logging", Object::from(disable_logging)),
-        ("rg", crate::ripgrep::lua_rg()),
+        ("ripgrep", Object::from(crate::ripgrep::ripgrep())),
     ]))
 }
 

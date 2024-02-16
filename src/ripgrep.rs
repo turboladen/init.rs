@@ -1,12 +1,4 @@
-// let g:rg_format = "%f:%l:%c:%m"
-// :h grepformat
-// :h errorformat
-// %f = file name
-// %l = line number
-// %c = column number
-// %m = message
-
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use grep::{
     matcher::Matcher as _,
@@ -14,26 +6,31 @@ use grep::{
     searcher::{sinks::UTF8, Searcher},
 };
 use ignore::WalkBuilder;
-use nvim_oxi::{Function, Object};
+use nvim_oxi::{Array, Dictionary, Function, Object};
 
-pub(crate) fn lua_rg() -> Object {
-    let f = Function::from_fn(|(matcher,)| rg(matcher));
+pub(crate) fn ripgrep() -> Dictionary {
+    let rg = Function::from_fn(|(matcher,)| rg(matcher));
 
-    Object::from(f)
+    Dictionary::from_iter([("rg", Object::from(rg))])
 }
 
-fn rg(requested_matcher: nvim_oxi::String) -> nvim_oxi::Result<()> {
-    let matcher = make_matcher(requested_matcher)?;
+fn rg(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Array> {
+    let pattern = make_match_str(requested_regex_str)?;
+    let matcher = RegexMatcher::new(&pattern.to_string_lossy()).map_err(swap_error)?;
+
     let cwd = std::env::current_dir().map_err(swap_error)?;
-    let search_results = search(&cwd, &matcher)?;
 
-    nvim_oxi::print!(
-        "Search results ({}): {:#?}",
-        search_results.len(),
-        &search_results
-    );
+    let search_results = search(&pattern, &cwd, &matcher)?;
+    let array: Array = search_results
+        .into_iter()
+        .enumerate()
+        .map(|(i, item)| {
+            nvim_oxi::print!("Item num {i}");
+            Object::from(item)
+        })
+        .collect();
 
-    Ok(())
+    Ok(array)
 }
 
 fn swap_error<E>(error: E) -> nvim_oxi::Error
@@ -43,18 +40,18 @@ where
     nvim_oxi::Error::Api(nvim_oxi::api::Error::Other(error.to_string()))
 }
 
-fn make_matcher(matcher: nvim_oxi::String) -> nvim_oxi::Result<RegexMatcher> {
-    let term = if matcher.is_empty() {
-        nvim_oxi::api::call_function("expand", ("<cword>",)).map_err(swap_error)?
-    } else {
-        matcher
-    };
-
-    RegexMatcher::new(&term.to_string_lossy())
-        .map_err(|e| nvim_oxi::Error::Api(nvim_oxi::api::Error::Other(e.to_string())))
+fn make_match_str(matcher: Option<nvim_oxi::String>) -> nvim_oxi::Result<nvim_oxi::String> {
+    match matcher {
+        Some(match_string) if !match_string.is_empty() => Ok(match_string),
+        _ => nvim_oxi::api::call_function("expand", ("<cword>",)).map_err(swap_error),
+    }
 }
 
-fn search(cwd: &Path, regex_matcher: &RegexMatcher) -> nvim_oxi::Result<Vec<Match>> {
+fn search(
+    pattern: &nvim_oxi::String,
+    cwd: &Path,
+    regex_matcher: &RegexMatcher,
+) -> nvim_oxi::Result<Vec<Match>> {
     let walker = WalkBuilder::new(cwd).build();
 
     let mut matches: Vec<Match> = vec![];
@@ -67,28 +64,52 @@ fn search(cwd: &Path, regex_matcher: &RegexMatcher) -> nvim_oxi::Result<Vec<Matc
                 nvim_oxi::print!("Found match: {:#?}", &mymatch);
 
                 matches.push(Match {
-                    file_path: entry.clone().into_path(),
-                    line_number,
-                    column_number: mymatch.start(),
-                    matching_text: line[mymatch].to_string(),
+                    file_name: nvim_oxi::String::from_bytes(
+                        entry.path().to_string_lossy().as_bytes(),
+                    ),
+                    line_number: line_number.try_into().unwrap_or_default(),
+                    column_start: mymatch.start().try_into().unwrap_or_default(),
+                    column_end: mymatch.end().try_into().unwrap_or_default(),
+                    text_line: nvim_oxi::String::from_bytes(line.trim().as_bytes()),
+                    pattern: pattern.clone(),
                 });
             }
 
             Ok(true)
         });
 
-        if let Err(e) = Searcher::new().search_path(regex_matcher, entry.path(), sink) {
-            // nvim_oxi::print!("Error searching file: {e}");
-        }
+        Searcher::new()
+            .search_path(regex_matcher, entry.path(), sink)
+            .ok();
     }
 
     Ok(matches)
 }
 
-#[derive(Debug)]
 struct Match {
-    file_path: PathBuf,
-    line_number: u64,
-    column_number: usize,
-    matching_text: String,
+    file_name: nvim_oxi::String,
+    line_number: i64,
+    column_start: i64,
+    column_end: i64,
+    text_line: nvim_oxi::String,
+    pattern: nvim_oxi::String,
+}
+
+impl From<Match> for Object {
+    fn from(value: Match) -> Self {
+        Dictionary::from(value).into()
+    }
+}
+
+impl From<Match> for Dictionary {
+    fn from(value: Match) -> Self {
+        Self::from_iter([
+            ("file_name", Object::from(value.file_name)),
+            ("line_number", Object::from(value.line_number)),
+            ("column_start", Object::from(value.column_start)),
+            ("column_end", Object::from(value.column_end)),
+            ("text_line", Object::from(value.text_line)),
+            ("pattern", Object::from(value.pattern)),
+        ])
+    }
 }
