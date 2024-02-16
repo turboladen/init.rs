@@ -7,30 +7,54 @@ use grep::{
 };
 use ignore::WalkBuilder;
 use nvim_oxi::{Array, Dictionary, Function, Object};
+use nvim_sous_chef::builtin::quickfix::SetQuickFixListItem;
 
 pub(crate) fn ripgrep() -> Dictionary {
     let rg = Function::from_fn(|(matcher,)| rg(matcher));
+    let rg_to_quick_fix = Function::from_fn(|(matcher,)| rg_to_quick_fix(matcher));
 
-    Dictionary::from_iter([("rg", Object::from(rg))])
+    Dictionary::from_iter([
+        ("rg", Object::from(rg)),
+        ("rg_to_quick_fix", Object::from(rg_to_quick_fix)),
+    ])
 }
 
 fn rg(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Array> {
+    let search_results = _rg(requested_regex_str)?;
+    let array: Array = search_results.into_iter().map(Object::from).collect();
+
+    Ok(array)
+}
+
+fn rg_to_quick_fix(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Array> {
+    let search_results = _rg(requested_regex_str)?;
+
+    let array: Array = search_results
+        .into_iter()
+        .map(|item| {
+            let qf_item = SetQuickFixListItem::from(item);
+
+            Object::from(qf_item)
+        })
+        .collect();
+
+    Ok(array)
+}
+
+fn _rg(requested_regex_str: Option<nvim_oxi::String>) -> nvim_oxi::Result<Vec<Match>> {
+    fn make_match_str(matcher: Option<nvim_oxi::String>) -> nvim_oxi::Result<nvim_oxi::String> {
+        match matcher {
+            Some(match_string) if !match_string.is_empty() => Ok(match_string),
+            _ => nvim_oxi::api::call_function("expand", ("<cword>",)).map_err(swap_error),
+        }
+    }
+
     let pattern = make_match_str(requested_regex_str)?;
     let matcher = RegexMatcher::new(&pattern.to_string_lossy()).map_err(swap_error)?;
 
     let cwd = std::env::current_dir().map_err(swap_error)?;
 
-    let search_results = search(&pattern, &cwd, &matcher)?;
-    let array: Array = search_results
-        .into_iter()
-        .enumerate()
-        .map(|(i, item)| {
-            nvim_oxi::print!("Item num {i}");
-            Object::from(item)
-        })
-        .collect();
-
-    Ok(array)
+    search(&pattern, &cwd, &matcher)
 }
 
 fn swap_error<E>(error: E) -> nvim_oxi::Error
@@ -38,13 +62,6 @@ where
     E: std::error::Error,
 {
     nvim_oxi::Error::Api(nvim_oxi::api::Error::Other(error.to_string()))
-}
-
-fn make_match_str(matcher: Option<nvim_oxi::String>) -> nvim_oxi::Result<nvim_oxi::String> {
-    match matcher {
-        Some(match_string) if !match_string.is_empty() => Ok(match_string),
-        _ => nvim_oxi::api::call_function("expand", ("<cword>",)).map_err(swap_error),
-    }
 }
 
 fn search(
@@ -61,7 +78,7 @@ fn search(
 
         let sink = UTF8(|line_number, line| {
             if let Ok(Some(mymatch)) = regex_matcher.find(line.as_bytes()) {
-                nvim_oxi::print!("Found match: {:#?}", &mymatch);
+                // nvim_oxi::print!("Found match: {:#?}", &mymatch);
 
                 matches.push(Match {
                     file_name: nvim_oxi::String::from_bytes(
@@ -111,5 +128,18 @@ impl From<Match> for Dictionary {
             ("text_line", Object::from(value.text_line)),
             ("pattern", Object::from(value.pattern)),
         ])
+    }
+}
+
+impl From<Match> for SetQuickFixListItem {
+    fn from(value: Match) -> Self {
+        SetQuickFixListItem {
+            filename: Some(value.file_name),
+            lnum: Some(value.line_number),
+            col: Some(value.column_start),
+            text: Some(value.text_line),
+            pattern: Some(value.pattern),
+            ..Self::default()
+        }
     }
 }
